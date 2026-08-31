@@ -17,6 +17,7 @@ const Graph = () => {
   const [error, setError] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.PUBLIC_URL}/industry-graph.json`)
@@ -106,6 +107,7 @@ const Graph = () => {
       return;
     }
     setSelectedNode(clickedNode);
+    setSidebarOpen(true);
     highlightNode(clickedNode);
   };
 
@@ -191,8 +193,28 @@ const Graph = () => {
               }
             }}
           />
+          {!sidebarOpen && (
+            <button
+              type="button"
+              className="sidebar-toggle"
+              onClick={() => setSidebarOpen(true)}
+            >
+              Search
+            </button>
+          )}
         </div>
-        <div className="graph-sidebar">
+        <aside className={`graph-sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <div className="sidebar-header">
+            <span>Search</span>
+            <button
+              type="button"
+              className="sidebar-close"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close sidebar"
+            >
+              Close
+            </button>
+          </div>
           <div className="search-wrap">
             <CosmographSearch
               ref={searchRef}
@@ -240,11 +262,11 @@ const Graph = () => {
                   ))}
               </ul>
               <button type="button" onClick={clearSelection}>
-                Close
+                Clear selection
               </button>
             </div>
           )}
-        </div>
+        </aside>
       </CosmographProvider>
     </div>
   );

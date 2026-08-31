@@ -4,6 +4,7 @@
   display: flex;
   background: #0b0d10;
   color: #f2f4f7;
+  overflow: hidden;
 }
 
 .graph-canvas {
@@ -19,7 +20,7 @@
   left: 16px;
   z-index: 2;
   pointer-events: none;
-  max-width: min(520px, calc(100% - 32px));
+  max-width: min(520px, calc(100% - 120px));
 }
 
 .graph-hud h1 {
@@ -36,14 +37,64 @@
   line-height: 1.45;
 }
 
+.sidebar-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #1a212b;
+  border: 1px solid #2a3340;
+  color: #f2f4f7;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar-toggle:hover {
+  background: #243041;
+}
+
 .graph-sidebar {
+  flex: 0 0 0;
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #12161c;
+  border-left: 0;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: flex-basis 0.22s ease, width 0.22s ease, opacity 0.18s ease,
+    padding 0.22s ease;
+}
+
+.graph-sidebar.open {
   flex: 0 0 320px;
   width: 320px;
   padding: 16px;
-  background: #12161c;
-  border-left: 1px solid #232a33;
   overflow: auto;
-  box-sizing: border-box;
+  border-left: 1px solid #232a33;
+  opacity: 1;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 650;
+  color: #9aa3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sidebar-close {
+  margin: 0 !important;
 }
 
 .graph-sidebar input,
