@@ -16,7 +16,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "node scripts/pack-graph-data.mjs",
     "build": "react-scripts build",
+    "pack-data": "node scripts/pack-graph-data.mjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",

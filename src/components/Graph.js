@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CosmographProvider, Cosmograph, CosmographSearch } from '@cosmograph/react';
+import { loadGraphData } from '../loadGraphData';
 import './Graph.css';
 
 const formatUsdMillions = (value) => {
@@ -20,13 +21,7 @@ const Graph = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.PUBLIC_URL}/industry-graph.json`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load graph data (${response.status})`);
-        }
-        return response.json();
-      })
+    loadGraphData()
       .then((payload) => {
         const companyMeta = new Map();
         const nodes = payload.nodes.map((node) => {

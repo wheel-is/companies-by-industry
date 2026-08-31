@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CSV_PATH = ROOT / "WYSB" / "web-based-scraper" / "industry_data.csv"
-OUT_PATH = Path(__file__).resolve().parents[1] / "public" / "industry-graph.json"
+OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "industry-graph.json"
 
 INDUSTRIES_PER_COMPANY = 2
 
