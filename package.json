@@ -2,7 +2,7 @@
   "name": "companies-by-industry",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://wheel-is.github.io/companies-by-industry",
+  "homepage": "https://bigindustrymap.com",
   "dependencies": {
     "@cosmograph/react": "^1.3.1",
     "@testing-library/jest-dom": "^5.17.0",
@@ -20,7 +20,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build -t --nojekyll"
+    "deploy": "gh-pages -d build -t --nojekyll --cname bigindustrymap.com"
   },
   "eslintConfig": {
     "extends": [
