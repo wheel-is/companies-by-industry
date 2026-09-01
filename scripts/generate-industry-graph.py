@@ -42,10 +42,10 @@ def hsl_to_hex(h: float, s: float, l: float) -> str:
     )
 
 
-def company_size(amount: float) -> float:
-    if amount <= 0:
+def company_size(amount: float, clip: float) -> float:
+    if amount <= 0 or clip <= 0:
         return 2.0
-    return round(2.0 + min(18.0, math.log10(amount + 1.0) * 5.0), 2)
+    return round(2.0 + 18.0 * min(1.0, amount / clip), 2)
 
 
 def industry_size(count: int) -> float:
@@ -123,9 +123,7 @@ def main() -> None:
     }
 
     selected_counts: dict[str, int] = defaultdict(int)
-    company_nodes = []
-    links = []
-
+    sized_companies = []
     for record in companies.values():
         ranked = sorted(
             record["industries"],
@@ -133,20 +131,40 @@ def main() -> None:
         )[:INDUSTRIES_PER_COMPANY]
         if not ranked:
             continue
+        valuation = valuations.get(record["name"], 0.0)
+        sized_companies.append(
+            {
+                "record": record,
+                "ranked": ranked,
+                "valuation": valuation,
+                "size_amount": valuation if valuation > 0 else record["vc"],
+            }
+        )
+
+    positive_amounts = sorted(
+        item["size_amount"] for item in sized_companies if item["size_amount"] > 0
+    )
+    clip = positive_amounts[int(len(positive_amounts) * 0.95)] if positive_amounts else 1.0
+    print(f"Linear size clip (p95): {clip}")
+
+    company_nodes = []
+    links = []
+
+    for item in sized_companies:
+        record = item["record"]
+        ranked = item["ranked"]
         primary = ranked[0]
         color = industry_colors[primary]
         company_id = f"c:{record['name']}"
-        valuation = valuations.get(record["name"], 0.0)
-        size_amount = valuation if valuation > 0 else record["vc"]
         company_nodes.append(
             {
                 "id": company_id,
                 "label": record["name"],
                 "type": "company",
                 "color": color,
-                "size": company_size(size_amount),
+                "size": company_size(item["size_amount"], clip),
                 "vc": round(record["vc"], 2),
-                "valuation": round(valuation, 2),
+                "valuation": round(item["valuation"], 2),
                 "valuationDate": valuation_dates.get(record["name"], ""),
                 "date": record["date"],
             }
