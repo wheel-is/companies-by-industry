@@ -11,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CSV_PATH = ROOT / "WYSB" / "web-based-scraper" / "industry_data.csv"
+COMPANIES_CSV = ROOT / "WYSB" / "web-based-scraper" / "companies_data.csv"
 OUT_PATH = Path(__file__).resolve().parents[1] / "data" / "industry-graph.json"
 
 INDUSTRIES_PER_COMPANY = 2
@@ -41,10 +42,10 @@ def hsl_to_hex(h: float, s: float, l: float) -> str:
     )
 
 
-def company_size(vc: float) -> float:
-    if vc <= 0:
+def company_size(amount: float) -> float:
+    if amount <= 0:
         return 2.0
-    return round(2.0 + min(14.0, math.log10(vc + 1.0) * 5.0), 2)
+    return round(2.0 + min(18.0, math.log10(amount + 1.0) * 5.0), 2)
 
 
 def industry_size(count: int) -> float:
@@ -61,9 +62,34 @@ def parse_vc(raw: str) -> float:
         return 0.0
 
 
+def load_valuations() -> tuple[dict[str, float], dict[str, str]]:
+    valuations: dict[str, float] = {}
+    dates: dict[str, str] = {}
+    if not COMPANIES_CSV.exists():
+        print(f"No companies CSV at {COMPANIES_CSV}; sizing will fall back to VC raised")
+        return valuations, dates
+
+    with COMPANIES_CSV.open(newline="", encoding="utf-8", errors="replace") as handle:
+        for row in csv.DictReader(handle):
+            name = (row.get("companyname") or "").strip()
+            if not name:
+                continue
+            amount = parse_vc(row.get("lastknownvaluation") or "")
+            if amount <= 0:
+                continue
+            if amount >= valuations.get(name, 0.0):
+                valuations[name] = amount
+                date = (row.get("lastknownvaluationdate") or "").strip()
+                if date:
+                    dates[name] = date
+    print(f"Loaded last-known valuations for {len(valuations)} companies")
+    return valuations, dates
+
+
 def main() -> None:
     companies: dict[str, dict] = {}
     industry_freq: dict[str, int] = defaultdict(int)
+    valuations, valuation_dates = load_valuations()
 
     with CSV_PATH.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
@@ -110,14 +136,18 @@ def main() -> None:
         primary = ranked[0]
         color = industry_colors[primary]
         company_id = f"c:{record['name']}"
+        valuation = valuations.get(record["name"], 0.0)
+        size_amount = valuation if valuation > 0 else record["vc"]
         company_nodes.append(
             {
                 "id": company_id,
                 "label": record["name"],
                 "type": "company",
                 "color": color,
-                "size": company_size(record["vc"]),
+                "size": company_size(size_amount),
                 "vc": round(record["vc"], 2),
+                "valuation": round(valuation, 2),
+                "valuationDate": valuation_dates.get(record["name"], ""),
                 "date": record["date"],
             }
         )

@@ -29,6 +29,8 @@ const Graph = () => {
             companyMeta.set(node.id, {
               funding: node.vc || 0,
               lastFunding: node.date || '',
+              valuation: node.valuation || 0,
+              valuationDate: node.valuationDate || '',
             });
           }
           return {
@@ -78,12 +80,15 @@ const Graph = () => {
 
   const companyFunding = (node) => companyMetaRef.current.get(node.id)?.funding || 0;
   const companyLastFunding = (node) => companyMetaRef.current.get(node.id)?.lastFunding || '';
+  const companyValuation = (node) => companyMetaRef.current.get(node.id)?.valuation || 0;
+  const companyValuationDate = (node) => companyMetaRef.current.get(node.id)?.valuationDate || '';
+  const companyValue = (node) => companyValuation(node) || companyFunding(node);
 
   const connectedDetails = (node) => {
     const ids = neighbors.get(node.id) || [];
     const connected = ids.map((id) => nodeById.get(id)).filter(Boolean);
     if (node.type === 'industry') {
-      return [...connected].sort((a, b) => companyFunding(b) - companyFunding(a));
+      return [...connected].sort((a, b) => companyValue(b) - companyValue(a));
     }
     return connected;
   };
@@ -234,6 +239,8 @@ const Graph = () => {
               <p>{selectedNode.type === 'industry' ? 'Industry' : 'Company'}</p>
               {selectedNode.type === 'company' && (
                 <>
+                  <p>Valuation: {formatUsdMillions(companyValuation(selectedNode))}</p>
+                  <p>Valuation date: {companyValuationDate(selectedNode) || '—'}</p>
                   <p>Funding: {formatUsdMillions(companyFunding(selectedNode))}</p>
                   <p>Last funding: {companyLastFunding(selectedNode) || '—'}</p>
                 </>
@@ -250,8 +257,8 @@ const Graph = () => {
                   .map((node) => (
                     <li key={node.id}>
                       {node.label}
-                      {node.type === 'company' && companyFunding(node)
-                        ? ` · ${formatUsdMillions(companyFunding(node))}`
+                      {node.type === 'company' && companyValue(node)
+                        ? ` · ${formatUsdMillions(companyValue(node))}`
                         : ''}
                     </li>
                   ))}
